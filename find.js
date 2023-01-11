@@ -16,27 +16,17 @@ var ast = babel_parser.parse(fileContent, {
 function lint(code) {
     return prettier.format(code, { "parser": "babel" });
 }
-/*
-traverse(ast, {
-    enter(path) {
-        const node = path.node;
-        if (t.isTemplateLiteral(node)) {
-            if (node.leadingComments) {
-                const tsxComments = node.leadingComments.filter(comment => comment.value.trim() === "tsx");
-                if (tsxComments.length > 0) {
-                    const linted = lint(node.quasis[0].value.raw)
-                    console.log(linted)
-                }
-            }
-        }
-    }
-});
-*/
 (0, traverse_1["default"])(ast, {
     enter: function (path) {
         var node = path.node;
         if (t.isTemplateLiteral(node)) {
-            console.log(node);
+            if (node.leadingComments) {
+                var tsxComments = node.leadingComments.filter(function (comment) { return comment.value.trim() === "tsx"; });
+                if (tsxComments.length > 0) {
+                    var linted = lint(node.quasis[0].value.raw);
+                    console.log(linted);
+                }
+            }
         }
     }
 });
