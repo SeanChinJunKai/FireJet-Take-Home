@@ -26,7 +26,7 @@ traverse(ast, {
         const node = path.node;
         if (t.isTemplateLiteral(node)) {
             if (node.leadingComments) {
-                const tsxComments = node.leadingComments.filter(comment => comment.value.trim() === "tsx");
+                const tsxComments = node.leadingComments.filter(comment => comment.value === "tsx");
                 if (tsxComments.length > 0) {
                     const linted = lint(node.quasis[0].value.raw)
                     console.log(linted)

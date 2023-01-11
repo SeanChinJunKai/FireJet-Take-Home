@@ -21,7 +21,7 @@ function lint(code) {
         var node = path.node;
         if (t.isTemplateLiteral(node)) {
             if (node.leadingComments) {
-                var tsxComments = node.leadingComments.filter(function (comment) { return comment.value.trim() === "tsx"; });
+                var tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
                 if (tsxComments.length > 0) {
                     var linted = lint(node.quasis[0].value.raw);
                     console.log(linted);
