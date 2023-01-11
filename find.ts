@@ -16,7 +16,7 @@ const ast = babel_parser.parse(fileContent, {
     plugins: ['typescript']
 });
 
-function lint(code: string) {
+ function lint(code: string) {
     return prettier.format(code, {"parser" : "babel"});
 }
 
