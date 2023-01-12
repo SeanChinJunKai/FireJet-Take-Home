@@ -20,23 +20,28 @@ async function lint(code: string) {
     return prettier.format(code, {"parser" : "babel"});
 
 }
+
 async function updateAST(oldAST: t.Program): Promise<t.Program> {
+    const promises: Promise<void>[] = []
     traverse(oldAST, {
-        enter: async (path) => {
+        enter: (path) => {
             const node = path.node;
             if (t.isTemplateLiteral(node)) {
                 if (node.leadingComments) {
                     const tsxComments = node.leadingComments.filter(comment => comment.value === "tsx");
                     if (tsxComments.length > 0) {
-                        const updatedLiteral = await lint(node.quasis[0].value.raw)
-                        node.quasis[0].value.raw = updatedLiteral
+                        node.quasis.forEach(quasi => {
+                            promises.push(lint(quasi.value.raw).then(raw => {
+                            quasi.value.raw = raw;
+                            }))
+                        })
                     }
                 }
             }
         }
     })
+    await Promise.all(promises)
     return oldAST
 }
 
-
-updateAST(ast.program).then(result => console.log(result))
+updateAST(ast.program).then(res => console.log(res))

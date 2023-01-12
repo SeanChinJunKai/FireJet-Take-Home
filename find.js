@@ -58,31 +58,34 @@ function lint(code) {
 }
 function updateAST(oldAST) {
     return __awaiter(this, void 0, void 0, function () {
-        var _this = this;
+        var promises;
         return __generator(this, function (_a) {
-            (0, traverse_1["default"])(oldAST, {
-                enter: function (path) { return __awaiter(_this, void 0, void 0, function () {
-                    var node, tsxComments, updatedLiteral;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                node = path.node;
-                                if (!t.isTemplateLiteral(node)) return [3 /*break*/, 2];
-                                if (!node.leadingComments) return [3 /*break*/, 2];
-                                tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
-                                if (!(tsxComments.length > 0)) return [3 /*break*/, 2];
-                                return [4 /*yield*/, lint(node.quasis[0].value.raw)];
-                            case 1:
-                                updatedLiteral = _a.sent();
-                                node.quasis[0].value.raw = updatedLiteral;
-                                _a.label = 2;
-                            case 2: return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    promises = [];
+                    (0, traverse_1["default"])(oldAST, {
+                        enter: function (path) {
+                            var node = path.node;
+                            if (t.isTemplateLiteral(node)) {
+                                if (node.leadingComments) {
+                                    var tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
+                                    if (tsxComments.length > 0) {
+                                        node.quasis.forEach(function (quasi) {
+                                            promises.push(lint(quasi.value.raw).then(function (raw) {
+                                                quasi.value.raw = raw;
+                                            }));
+                                        });
+                                    }
+                                }
+                            }
                         }
                     });
-                }); }
-            });
-            return [2 /*return*/, oldAST];
+                    return [4 /*yield*/, Promise.all(promises)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, oldAST];
+            }
         });
     });
 }
-updateAST(ast.program).then(function (result) { return console.log(result); });
+updateAST(ast.program).then(function (res) { return console.log(res); });
