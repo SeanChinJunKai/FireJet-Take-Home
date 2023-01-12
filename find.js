@@ -85,30 +85,4 @@ function updateAST(oldAST) {
         });
     });
 }
-//updateAST(ast.program).then(result => console.log(result))
-(0, traverse_1["default"])(ast, {
-    enter: function (path) {
-        var node = path.node;
-        if (t.isTemplateLiteral(node)) {
-            if (node.leadingComments) {
-                var tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
-                if (tsxComments.length > 0) {
-                    console.log(node.quasis[0].value.raw);
-                }
-            }
-        }
-    }
-});
-updateAST(ast.program).then(function (result) { return (0, traverse_1["default"])(result, {
-    enter: function (path) {
-        var node = path.node;
-        if (t.isTemplateLiteral(node)) {
-            if (node.leadingComments) {
-                var tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
-                if (tsxComments.length > 0) {
-                    console.log(node.quasis[0].value.raw);
-                }
-            }
-        }
-    }
-}); });
+updateAST(ast.program).then(function (result) { return console.log(result); });
