@@ -7,7 +7,6 @@ import * as prettier from "prettier";
 
 const filePath = "./sample.ts";
 
-
 //  reads the file located at filePath and returns its contents as a string
 const fileContent = fs.readFileSync(filePath, 'utf8');
 
@@ -21,39 +20,23 @@ async function lint(code: string) {
     return prettier.format(code, {"parser" : "babel"});
 
 }
-
-let literals: string[] = []
-
-// Traversing the AST
-traverse(ast, {
-    enter: async(path) => {
-        const node = path.node;
-        if (t.isTemplateLiteral(node)) {
-            if (node.leadingComments) {
-                const tsxComments = node.leadingComments.filter(comment => comment.value === "tsx");
-                if (tsxComments.length > 0) {
-                    literals.push(node.quasis[0].value.raw)
-                    const updatedLiteral = await lint(node.quasis[0].value.raw)
-                    node.quasis[0].value.raw = updatedLiteral
+async function updateAST(oldAST: t.Program): Promise<t.Program> {
+    traverse(oldAST, {
+        enter: async (path) => {
+            const node = path.node;
+            if (t.isTemplateLiteral(node)) {
+                if (node.leadingComments) {
+                    const tsxComments = node.leadingComments.filter(comment => comment.value === "tsx");
+                    if (tsxComments.length > 0) {
+                        const updatedLiteral = await lint(node.quasis[0].value.raw)
+                        node.quasis[0].value.raw = updatedLiteral
+                    }
                 }
             }
         }
-
-    }
-});
-
-async function lintPrintting() {
-    for (let i = 0; i < literals.length; i++) {
-        const linted = await lint(literals[i])
-        console.log(linted)
-    }
+    })
+    return oldAST
 }
 
-async function updateAST(oldAST: t.Program): t.Program {
-    return //TODO   
-}
 
-lintPrintting();
-
-
-
+updateAST(ast.program).then(result => console.log(result))

@@ -56,8 +56,36 @@ function lint(code) {
         });
     });
 }
-var literals = [];
-// Traversing the AST
+function updateAST(oldAST) {
+    return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
+        return __generator(this, function (_a) {
+            (0, traverse_1["default"])(oldAST, {
+                enter: function (path) { return __awaiter(_this, void 0, void 0, function () {
+                    var node, tsxComments, updatedLiteral;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                node = path.node;
+                                if (!t.isTemplateLiteral(node)) return [3 /*break*/, 2];
+                                if (!node.leadingComments) return [3 /*break*/, 2];
+                                tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
+                                if (!(tsxComments.length > 0)) return [3 /*break*/, 2];
+                                return [4 /*yield*/, lint(node.quasis[0].value.raw)];
+                            case 1:
+                                updatedLiteral = _a.sent();
+                                node.quasis[0].value.raw = updatedLiteral;
+                                _a.label = 2;
+                            case 2: return [2 /*return*/];
+                        }
+                    });
+                }); }
+            });
+            return [2 /*return*/, oldAST];
+        });
+    });
+}
+//updateAST(ast.program).then(result => console.log(result))
 (0, traverse_1["default"])(ast, {
     enter: function (path) {
         var node = path.node;
@@ -65,33 +93,22 @@ var literals = [];
             if (node.leadingComments) {
                 var tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
                 if (tsxComments.length > 0) {
-                    literals.push(node.quasis[0].value.raw);
+                    console.log(node.quasis[0].value.raw);
                 }
             }
         }
     }
 });
-function lintPrintting() {
-    return __awaiter(this, void 0, void 0, function () {
-        var i, linted;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    i = 0;
-                    _a.label = 1;
-                case 1:
-                    if (!(i < literals.length)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, lint(literals[i])];
-                case 2:
-                    linted = _a.sent();
-                    console.log(linted);
-                    _a.label = 3;
-                case 3:
-                    i++;
-                    return [3 /*break*/, 1];
-                case 4: return [2 /*return*/];
+updateAST(ast.program).then(function (result) { return (0, traverse_1["default"])(result, {
+    enter: function (path) {
+        var node = path.node;
+        if (t.isTemplateLiteral(node)) {
+            if (node.leadingComments) {
+                var tsxComments = node.leadingComments.filter(function (comment) { return comment.value === "tsx"; });
+                if (tsxComments.length > 0) {
+                    console.log(node.quasis[0].value.raw);
+                }
             }
-        });
-    });
-}
-lintPrintting();
+        }
+    }
+}); });
