@@ -26,13 +26,15 @@ let literals: string[] = []
 
 // Traversing the AST
 traverse(ast, {
-    enter(path){
+    enter: async(path) => {
         const node = path.node;
         if (t.isTemplateLiteral(node)) {
             if (node.leadingComments) {
                 const tsxComments = node.leadingComments.filter(comment => comment.value === "tsx");
                 if (tsxComments.length > 0) {
                     literals.push(node.quasis[0].value.raw)
+                    const updatedLiteral = await lint(node.quasis[0].value.raw)
+                    node.quasis[0].value.raw = updatedLiteral
                 }
             }
         }
@@ -45,6 +47,10 @@ async function lintPrintting() {
         const linted = await lint(literals[i])
         console.log(linted)
     }
+}
+
+async function updateAST(oldAST: t.Program): t.Program {
+    return //TODO   
 }
 
 lintPrintting();
